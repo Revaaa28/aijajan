@@ -151,7 +151,8 @@ app.post('/api/mission', async (req, res) => {
       verdict = policyEngine.evaluate(candidate, policyCtx(state));
       steps.push({ kind: 'verdict', decision: verdict.decision, rule: verdict.rule, text: `${candidate.name}: ${verdict.decision} — rule "${verdict.rule}". ${verdict.reason}` });
       if (verdict.decision !== 'BLOCK') { chosen = candidate; break; }
-      if (i < plan.options.length - 1) {
+      // A frozen wallet blocks everything identically — no sheepish retries.
+      if (i < plan.options.length - 1 && verdict.rule !== 'kill-switch') {
         steps.push({ kind: 'retry', text: `Okay, okay — not that one then. Checking my next option…` });
       }
     }
