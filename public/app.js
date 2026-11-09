@@ -44,7 +44,15 @@ function render(state) {
   renderDiary(state);
   renderAudit(state);
   renderCatalog(state);
+  $('shopBadge').classList.toggle('hidden', !(state.pending.length > 0 || state.plea));
 }
+
+// --- Tabs: one panel at a time; Shop holds the mission loop -------------------
+function activateTab(name) {
+  document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.tab-panel').forEach((p) => { p.hidden = p.id !== 'panel-' + name; });
+}
+document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => activateTab(t.dataset.tab)));
 
 const CATEGORY_META = {
   domains: ['🌐', 'Domains'], hosting: ['🖥️', 'Hosting'], games: ['🎮', 'Games'],
@@ -88,6 +96,7 @@ function renderCatalog(state) {
     card.querySelector('.cat-item-vendor').textContent = item.vendor;
     card.title = item.blurb;
     card.addEventListener('click', () => {
+      activateTab('shop');
       $('missionInput').value = 'Buy me: ' + item.name;
       $('missionInput').scrollIntoView({ behavior: 'smooth', block: 'center' });
       $('missionInput').focus();
@@ -171,6 +180,7 @@ async function sendMission() {
   $('feed').innerHTML = '<div class="step">Jaja grabbed the shopping list and ran out the door…</div>';
   try {
     const data = await api('/api/mission', { text });
+    activateTab('shop');
     renderSteps(data.steps);
     render(data.state);
   } catch (err) {

@@ -52,16 +52,24 @@
   </div>
 </header>
 
-<section class="steps" aria-label="How AIJajan works">
-  <div class="step"><span class="step-n">1</span><div><strong>Send Jaja a mission</strong><span>“Buy me lunch”, “a train ticket” — in English or Indonesian.</span></div></div>
-  <div class="step-arrow" aria-hidden="true">→</div>
-  <div class="step"><span class="step-n">2</span><div><strong>The policy engine rules on it</strong><span>Your plain-words rules, enforced by code — never by the AI: <b class="v-allow">ALLOW</b> · <b class="v-ask">ASK</b> · <b class="v-block">BLOCK</b>.</span></div></div>
-  <div class="step-arrow" aria-hidden="true">→</div>
-  <div class="step"><span class="step-n">3</span><div><strong>Jaja writes it all in the diary</strong><span>Every spend, block and plea — a story, plus a full audit log.</span></div></div>
+<section class="how-steps" aria-label="How AIJajan works">
+  <div class="how-step"><span class="how-step-n">1</span><div><strong>Send Jaja a mission</strong><span>“Buy me lunch”, “a train ticket” — in English or Indonesian.</span></div></div>
+  <div class="how-step-arrow" aria-hidden="true">→</div>
+  <div class="how-step"><span class="how-step-n">2</span><div><strong>The policy engine rules on it</strong><span>Your plain-words rules, enforced by code — never by the AI: <b class="v-allow">ALLOW</b> · <b class="v-ask">ASK</b> · <b class="v-block">BLOCK</b>.</span></div></div>
+  <div class="how-step-arrow" aria-hidden="true">→</div>
+  <div class="how-step"><span class="how-step-n">3</span><div><strong>Jaja writes it all in the diary</strong><span>Every spend, block and plea — a story, plus a full audit log.</span></div></div>
 </section>
 
-<main class="grid">
-  <section class="col-main">
+<main class="layout">
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button class="tab active" data-tab="shop" role="tab">🛍️ Shop <span class="tab-badge hidden" id="shopBadge">!</span></button>
+    <button class="tab" data-tab="rules" role="tab">⚖️ Rules</button>
+    <button class="tab" data-tab="diary" role="tab">📔 Diary</button>
+    <button class="tab" data-tab="catalog" role="tab">🗂️ Catalog</button>
+    <button class="tab" data-tab="audit" role="tab">🧾 Audit log</button>
+  </nav>
+
+  <section class="tab-panel" id="panel-shop">
     <div class="card mission-card">
       <h2>1 · Give Jaja a mission</h2>
       <div class="mission-row">
@@ -83,12 +91,18 @@
     <div id="pendingZone"></div>
     <div id="pleaZone"></div>
 
+  </section>
+
+  <section class="tab-panel" id="panel-catalog" hidden>
     <div class="card catalog-card">
       <h2>The catalog <span class="sub">— everything Jaja can shop for; tap an item to make it a mission</span></h2>
       <div id="catalogChips" class="catalogChips"></div>
       <div id="catalogGrid" class="catalog-grid"></div>
     </div>
 
+  </section>
+
+  <section class="tab-panel" id="panel-audit" hidden>
     <div class="card audit-card">
       <h2>Audit log <span class="sub">— every decision, with the rule that made it</span></h2>
       <table class="audit">
@@ -98,7 +112,7 @@
     </div>
   </section>
 
-  <aside class="col-side">
+  <section class="tab-panel" id="panel-rules" hidden>
     <div class="card rules-card">
       <h2>2 · The rules <span class="sub">— Jaja cannot break these</span></h2>
       <p class="rules-note">Enforced by a deterministic policy engine in plain code — not by the AI. Jaja proposes; the rules dispose.</p>
@@ -126,11 +140,14 @@
       <button id="resetBtn" class="btn btn-ghost">Reset demo</button>
     </div>
 
+  </section>
+
+  <section class="tab-panel" id="panel-diary" hidden>
     <div class="card diary-card">
       <h2>3 · Jaja's diary 📔</h2>
       <div id="diary"></div>
     </div>
-  </aside>
+  </section>
 </main>
 
 <div class="batik-band" aria-hidden="true"></div>

@@ -100,11 +100,28 @@ h1 .wordmark { background: linear-gradient(92deg, var(--blue-deep), var(--blue) 
 .killswitch input { accent-color: #ff5d47; width: 16px; height: 16px; cursor: pointer; }
 
 /* ---------- Layout & cards ---------- */
-.grid {
-  display: grid; grid-template-columns: minmax(0, 1.62fr) minmax(290px, 1fr);
-  gap: 20px; padding: 22px 26px 6px; max-width: 1260px; margin: 0 auto; align-items: start;
+.layout { padding: 22px 26px 6px; max-width: 940px; margin: 0 auto; }
+@media (max-width: 920px) { .layout { padding: 16px; } .wallet { min-width: 0; width: 100%; } }
+
+/* ---------- Tab menu ---------- */
+.tabs {
+  display: flex; gap: 6px; flex-wrap: wrap; background: var(--card);
+  border: 1px solid var(--line); border-radius: 999px; padding: 6px;
+  margin-bottom: 20px; box-shadow: var(--shadow);
 }
-@media (max-width: 920px) { .grid { grid-template-columns: 1fr; padding: 16px; } .wallet { min-width: 0; width: 100%; } }
+.tab {
+  border: 0; background: transparent; padding: 9px 18px; border-radius: 999px;
+  font: inherit; font-weight: 700; font-size: 14.5px; color: var(--ink-soft);
+  cursor: pointer; display: inline-flex; gap: 7px; align-items: center; flex: 1 1 auto; justify-content: center;
+}
+.tab:hover { color: var(--blue-deep); background: var(--bg); }
+.tab.active { background: var(--blue-deep); color: #fff; }
+.tab-badge {
+  background: #d33a2c; color: #fff; border-radius: 999px; min-width: 19px; height: 19px;
+  font-size: 11.5px; font-weight: 800; display: grid; place-items: center; padding: 0 5px;
+}
+.tab-badge.hidden { display: none; }
+.tab-panel[hidden] { display: none; }
 .card {
   background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 20px 22px; margin-bottom: 20px; box-shadow: var(--shadow);
@@ -251,34 +268,21 @@ footer strong { color: var(--ink-soft); }
 .cat-item-price { font-size: 14px; font-weight: 800; color: var(--blue-deep); }
 
 /* --- How it works strip ------------------------------------------------------ */
-.steps {
-  max-width: 1180px; margin: 0 auto; padding: 16px 24px 0;
+.how-steps {
+  max-width: 940px; margin: 0 auto; padding: 16px 24px 0;
   display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap;
 }
-.step {
+.how-step {
   flex: 1 1 220px; display: flex; gap: 11px; align-items: flex-start;
   background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px;
 }
-.step-n {
+.how-step-n {
   flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
   background: var(--blue-deep); color: #fff; font-weight: 800; font-size: 14px;
   display: grid; place-items: center;
 }
-.step strong { display: block; font-size: 14.5px; color: var(--ink); }
-.step span { font-size: 13px; color: var(--ink-soft); line-height: 1.45; }
-.step-arrow { align-self: center; color: var(--ink-faint); font-weight: 800; }
+.how-step strong { display: block; font-size: 14.5px; color: var(--ink); }
+.how-step span { font-size: 13px; color: var(--ink-soft); line-height: 1.45; }
+.how-step-arrow { align-self: center; color: var(--ink-faint); font-weight: 800; }
 .v-allow { color: var(--good); } .v-ask { color: #d98e00; } .v-block { color: #d33a2c; }
-@media (max-width: 700px) { .step-arrow { display: none; } .steps { padding: 14px 16px 0; } }
-
-/* --- Phone order: mission → rules → diary → catalog → audit ------------------- */
-@media (max-width: 920px) {
-  .grid { display: flex; flex-direction: column; }
-  .col-main, .col-side { display: contents; }
-  .mission-card { order: 1; }
-  #pendingZone { order: 2; }
-  #pleaZone { order: 3; }
-  .rules-card { order: 4; }
-  .diary-card { order: 5; }
-  .catalog-card { order: 6; }
-  .audit-card { order: 7; }
-}
+@media (max-width: 700px) { .how-step-arrow { display: none; } .how-steps { padding: 14px 16px 0; } }
