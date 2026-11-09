@@ -1,0 +1,247 @@
+'use strict';
+
+/**
+ * AIJajan server — a tiny Express app.
+ *
+ * Flow: owner sends a mission -> Jaja (agent.js) proposes a pick ->
+ * policy.js (deterministic, not the LLM) verdicts ALLOW / ASK / BLOCK ->
+ * paypal.js moves sandbox money -> store.js persists everything.
+ *
+ * Modes: PAYPAL_MOCK=1 (or missing PayPal creds) simulates PayPal;
+ * GEMINI_API_KEY unset uses the deterministic mock planner. With both
+ * unset the app still runs end-to-end — that's the judges' zero-setup path.
+ */
+
+// Minimal .env loader (keeps the dependency list at just express).
+const fs = require('fs');
+const path = require('path');
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+  for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
+    const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/i);
+    if (m && process.env[m[1]] === undefined) process.env[m[1]] = m[2].replace(/^["']|["']$/g, '');
+  }
+}
+
+const express = require('express');
+const policyEngine = require('./src/policy');
+const store = require('./src/store');
+const agent = require('./src/agent');
+const { ITEMS } = require('./src/catalog');
+const { createPayPalClient } = require('./src/paypal');
+
+const paypal = createPayPalClient();
+const app = express();
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+
+const PORT = process.env.PORT || 3000;
+
+/** The public view of the world — everything the UI renders from. */
+function publicState(state) {
+  return {
+    balance: state.balance,
+    mood: store.moodFor(state.balance),
+    frozen: state.frozen,
+    policy: state.policy,
+    pending: state.pending,
+    plea: state.plea,
+    diary: state.diary.slice(-20).reverse(),
+    audit: state.audit.slice(-50).reverse(),
+    spentTotal: state.spentTotal,
+    catalog: ITEMS,
+    modes: { paypal: paypal.mode, ai: process.env.GEMINI_API_KEY ? 'gemini' : 'mock' },
+  };
+}
+
+function policyCtx(state) {
+  return {
+    policy: state.policy,
+    frozen: state.frozen,
+    balance: state.balance,
+    monthSpent: Object.fromEntries(ITEMS.map((i) => [i.category, store.monthSpentFor(state, i.category)])),
+  };
+}
+
+async function executePayment(state, item, verdict) {
+  const result = await paypal.payForItem(item);
+  state.balance = store.round2(state.balance - item.price);
+  store.recordSpend(state, item);
+  store.audit(state, 'purchase', `Paid $${item.price.toFixed(2)} for "${item.name}" (${result.orderId})`, {
+    amount: -item.price, rule: verdict ? verdict.rule : 'owner-approved',
+  });
+  return result;
+}
+
+app.get('/api/health', (req, res) => {
+  const state = store.load();
+  res.json({ ok: true, paypalMode: paypal.mode, aiMode: process.env.GEMINI_API_KEY ? 'gemini' : 'mock', balance: state.balance, frozen: state.frozen });
+});
+
+app.get('/api/state', (req, res) => {
+  res.json(publicState(store.load()));
+});
+
+app.post('/api/policy', (req, res) => {
+  const state = store.load();
+  const b = req.body || {};
+  for (const key of ['maxPerPurchase', 'askAbove', 'weeklyAllowance']) {
+    if (b[key] !== undefined && Number.isFinite(Number(b[key])) && Number(b[key]) >= 0) state.policy[key] = Number(b[key]);
+  }
+  if (b.categoryCaps && typeof b.categoryCaps === 'object') state.policy.categoryCaps = b.categoryCaps;
+  if (Array.isArray(b.blockedCategories)) state.policy.blockedCategories = b.blockedCategories;
+  if (typeof b.blockSubscriptions === 'boolean') state.policy.blockSubscriptions = b.blockSubscriptions;
+  store.audit(state, 'policy', 'Owner updated the rules.');
+  store.save(state);
+  res.json(publicState(state));
+});
+
+app.post('/api/mission', async (req, res) => {
+  const text = String((req.body || {}).text || '').trim();
+  if (!text) return res.status(400).json({ error: 'Mission text is required.' });
+  const state = store.load();
+  const steps = [];
+  try {
+    const plan = await agent.planMission(text);
+    steps.push({ kind: 'found', text: `Scouted ${ITEMS.length} listings. Top finds: ${plan.options.map((o) => `${o.name} ($${o.price.toFixed(2)})`).join(' · ')}` });
+    steps.push({ kind: 'pitch', text: plan.pitch });
+
+    // Jaja proposes; the policy engine disposes. If the pick is BLOCKed,
+    // Jaja sheepishly tries its next option once before giving up.
+    let chosen = null;
+    let verdict = null;
+    for (let i = 0; i < plan.options.length; i++) {
+      const candidate = plan.options[i];
+      verdict = policyEngine.evaluate(candidate, policyCtx(state));
+      steps.push({ kind: 'verdict', decision: verdict.decision, rule: verdict.rule, text: `${candidate.name}: ${verdict.decision} — rule "${verdict.rule}". ${verdict.reason}` });
+      if (verdict.decision !== 'BLOCK') { chosen = candidate; break; }
+      if (i < plan.options.length - 1) {
+        steps.push({ kind: 'retry', text: `Okay, okay — not that one then. Checking my next option…` });
+      }
+    }
+
+    if (!chosen) {
+      store.audit(state, 'blocked', `Mission "${text}" — every option was blocked. Last rule: ${verdict.rule}`);
+      state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: agent.writeDiary('blocked', { item: plan.pick, price: plan.pick.price.toFixed(2), reason: verdict.reason, rule: verdict.rule }) });
+      store.save(state);
+      return res.json({ steps, outcome: 'blocked', verdict, state: publicState(state) });
+    }
+
+    if (verdict.decision === 'ASK') {
+      const pending = { id: `pend-${Date.now()}`, item: chosen, verdict, mission: text, createdAt: new Date().toISOString() };
+      state.pending.push(pending);
+      store.audit(state, 'ask', `Asked owner before buying "${chosen.name}" ($${chosen.price.toFixed(2)})`, { rule: verdict.rule });
+      state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: agent.writeDiary('asked', { item: chosen, price: chosen.price.toFixed(2) }) });
+      store.save(state);
+      steps.push({ kind: 'pending', text: `Waiting on the boss. Approve it and I pay instantly.` });
+      return res.json({ steps, outcome: 'ask', pendingId: pending.id, verdict, state: publicState(state) });
+    }
+
+    // ALLOW — pay right away.
+    const result = await executePayment(state, chosen, verdict);
+    state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: agent.writeDiary('paid', { item: chosen, price: chosen.price.toFixed(2), balance: state.balance.toFixed(2), rule: verdict.rule }) });
+    store.save(state);
+    steps.push({ kind: 'paid', text: `Paid via PayPal (${paypal.mode}). Order ${result.orderId}. New balance $${state.balance.toFixed(2)}.` });
+    return res.json({ steps, outcome: 'paid', verdict, order: result, state: publicState(state) });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: String(err.message || err) });
+  }
+});
+
+app.post('/api/approve', async (req, res) => {
+  const state = store.load();
+  const idx = state.pending.findIndex((p) => p.id === (req.body || {}).id);
+  if (idx === -1) return res.status(404).json({ error: 'Pending approval not found.' });
+  const [pending] = state.pending.splice(idx, 1);
+  if (state.frozen) {
+    return res.status(409).json({ error: 'Jaja is frozen (kill switch). Unfreeze before approving purchases.' });
+  }
+  if (pending.item.price > state.balance) {
+    return res.status(409).json({ error: 'Not enough uang jajan left for this purchase.' });
+  }
+  try {
+    const result = await executePayment(state, pending.item, null);
+    state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: agent.writeDiary('paid', { item: pending.item, price: pending.item.price.toFixed(2), balance: state.balance.toFixed(2), rule: 'owner-approved' }) });
+    store.save(state);
+    return res.json({ outcome: 'paid', order: result, state: publicState(state) });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: String(err.message || err) });
+  }
+});
+
+app.post('/api/deny', (req, res) => {
+  const state = store.load();
+  const idx = state.pending.findIndex((p) => p.id === (req.body || {}).id);
+  if (idx === -1) return res.status(404).json({ error: 'Pending approval not found.' });
+  const [pending] = state.pending.splice(idx, 1);
+  store.audit(state, 'denial', `Owner denied "${pending.item.name}" ($${pending.item.price.toFixed(2)})`);
+  state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: agent.writeDiary('denied', { item: pending.item, price: pending.item.price.toFixed(2) }) });
+  store.save(state);
+  res.json({ outcome: 'denied', state: publicState(state) });
+});
+
+app.post('/api/plea', async (req, res) => {
+  const state = store.load();
+  if (state.balance >= 5) return res.status(409).json({ error: `Jaja still has $${state.balance.toFixed(2)} — pleas are only for the truly broke (under $5).` });
+  if (!state.plea) {
+    const plea = await agent.composePlea(state);
+    state.plea = { id: `plea-${Date.now()}`, ...plea, createdAt: new Date().toISOString() };
+    store.audit(state, 'plea', `Jaja composed a plea for a $${plea.amount} top-up.`);
+    store.save(state);
+  }
+  res.json({ plea: state.plea, state: publicState(state) });
+});
+
+app.post('/api/plea/approve', async (req, res) => {
+  const state = store.load();
+  if (!state.plea) return res.status(404).json({ error: 'No plea to approve.' });
+  const amount = state.plea.amount;
+  state.plea = null;
+  const result = await paypal.topUp(amount);
+  state.balance = store.round2(state.balance + amount);
+  store.audit(state, 'topup', `Owner approved the plea — topped up $${amount.toFixed(2)} (${result.payoutId})`, { amount });
+  state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: agent.writeDiary('topup', { amount: amount.toFixed(2), balance: state.balance.toFixed(2) }) });
+  store.save(state);
+  res.json({ outcome: 'topped-up', payout: result, state: publicState(state) });
+});
+
+app.post('/api/plea/deny', (req, res) => {
+  const state = store.load();
+  if (!state.plea) return res.status(404).json({ error: 'No plea to deny.' });
+  state.plea = null;
+  store.audit(state, 'plea-denied', 'Owner denied Jaja\'s top-up plea.');
+  state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: agent.writeDiary('pleaDenied', {}) });
+  store.save(state);
+  res.json({ outcome: 'plea-denied', state: publicState(state) });
+});
+
+app.post('/api/topup', async (req, res) => {
+  const amount = Number((req.body || {}).amount);
+  if (!Number.isFinite(amount) || amount <= 0 || amount > 500) return res.status(400).json({ error: 'Top-up amount must be between $0 and $500.' });
+  const state = store.load();
+  const result = await paypal.topUp(amount);
+  state.balance = store.round2(state.balance + amount);
+  if (state.plea && state.balance >= 5) state.plea = null;
+  store.audit(state, 'topup', `Owner topped up $${amount.toFixed(2)} (${result.payoutId})`, { amount });
+  state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: agent.writeDiary('topup', { amount: amount.toFixed(2), balance: state.balance.toFixed(2) }) });
+  store.save(state);
+  res.json({ outcome: 'topped-up', payout: result, state: publicState(state) });
+});
+
+app.post('/api/freeze', (req, res) => {
+  const state = store.load();
+  state.frozen = Boolean((req.body || {}).frozen);
+  store.audit(state, state.frozen ? 'freeze' : 'unfreeze', state.frozen ? 'Kill switch ON — Jaja is frozen.' : 'Kill switch OFF — Jaja may shop again.');
+  store.save(state);
+  res.json(publicState(state));
+});
+
+app.post('/api/reset', (req, res) => {
+  res.json(publicState(store.reset()));
+});
+
+app.listen(PORT, () => {
+  console.log(`AIJajan is awake on http://localhost:${PORT}  (PayPal: ${paypal.mode}, AI: ${process.env.GEMINI_API_KEY ? 'gemini' : 'mock'})`);
+});
