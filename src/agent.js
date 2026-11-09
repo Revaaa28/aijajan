@@ -151,7 +151,19 @@ async function planMission(missionText) {
     if (pick) {
       const options = (llm.optionIds || []).map(byId).filter(Boolean);
       if (!options.find((o) => o.id === pick.id)) options.unshift(pick);
-      return { options: options.slice(0, 3), pick, pitch: llm.pitch || fallback.pitch, source: 'gemini' };
+      // The LLM sometimes writes its pitch about a runner-up instead of its
+      // own pickId. If the pitch never mentions the pick (vendor, head word
+      // or price), swap in a composed pitch so the story Jaja tells always
+      // matches the item the policy engine judges.
+      let pitch = llm.pitch || fallback.pitch;
+      const p = String(pitch).toLowerCase();
+      const head = pick.name.toLowerCase().split(/[\s—-]+/).find((w) => w.length >= 4) || '';
+      const mentions = (head && p.includes(head)) || p.includes(pick.vendor.toLowerCase()) ||
+        p.includes('$' + pick.price.toFixed(2)) || p.includes('$' + String(pick.price));
+      if (!mentions) {
+        pitch = `"${pick.name}" from ${pick.vendor} at $${pick.price.toFixed(2)} is the one calling my name. ${pick.blurb}`;
+      }
+      return { options: options.slice(0, 3), pick, pitch, source: 'gemini' };
     }
   }
   return fallback;
