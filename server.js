@@ -138,6 +138,8 @@ app.post('/api/mission', async (req, res) => {
     }
 
     steps.push({ kind: 'found', text: `Scouted ${ITEMS.length} listings. Top finds: ${plan.options.map((o) => `${o.name} ($${o.price.toFixed(2)})`).join(' · ')}` });
+    const cmp = agent.compareLine(plan.options);
+    if (cmp) steps.push({ kind: 'compare', text: cmp });
     steps.push({ kind: 'pitch', text: plan.pitch });
 
     // Jaja proposes; the policy engine disposes. If the pick is BLOCKed,

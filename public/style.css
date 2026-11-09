@@ -354,3 +354,5 @@ footer strong { color: var(--ink-soft); }
 .theme-toggle:hover { border-color: var(--blue); }
 [data-theme="dark"] .how-step-n { background: #0057c2; }
 [data-theme="dark"] .catalog-chip.active { background: #0057c2; border-color: #0057c2; }
+.step.compare { border-color: #c3d9f8; border-left-color: var(--blue); background: #eef5ff; }
+[data-theme="dark"] .step.compare { background: #12233f; border-color: #274a7a; }

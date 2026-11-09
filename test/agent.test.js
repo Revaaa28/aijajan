@@ -40,6 +40,16 @@ test('fallback planner understands Indonesian at item level', () => {
   assert.equal(mockPlan('nasi goreng satu porsi').pick.id, 'fod-01');
 });
 
+test('compareLine recommends honestly on price', () => {
+  const { compareLine } = require('../src/agent');
+  const cheap = { id: 'a', name: 'Cheap', price: 5 };
+  const pricey = { id: 'b', name: 'Pricey', price: 9 };
+  assert.match(compareLine([cheap, pricey]), /cheapest fit/);
+  assert.match(compareLine([pricey, cheap]), /recommends Pricey/);
+  assert.match(compareLine([cheap]), /only one genuine fit/);
+  assert.equal(compareLine([]), null);
+});
+
 test('ticket missions pick tickets in both languages', () => {
   assert.equal(mockPlan('buy me a concert ticket').pick.id, 'tic-01');
   assert.equal(mockPlan('beli tiket kereta ke kota sebelah').pick.id, 'tic-03');

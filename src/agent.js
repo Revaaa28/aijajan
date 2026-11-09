@@ -139,7 +139,7 @@ async function planMission(missionText) {
     `IMPORTANT: if NO catalog item genuinely serves the mission, do not force a pick and do not ` +
     `rationalise a metaphor (hosting is not a house). Reply instead: {"pickId": null, "optionIds": [], ` +
     `"pitch": "1-2 playful sentences declining: it is outside pocket-money territory"}. ` +
-    `Otherwise reply with ONLY JSON: {"pickId": "...", "optionIds": ["...","...","..."], "pitch": "1-2 sentences in your playful voice explaining the pick"}`
+    `Otherwise reply with ONLY JSON: {"pickId": "...", "optionIds": ["...","...","..."], "pitch": "1-2 sentences in your playful voice explaining the pick, including one phrase on why it beats the runner-up (price or fit)"}`
   );
   if (llm && 'pickId' in llm && llm.pickId === null) {
     // The LLM explicitly declined: nothing in the catalog fits the mission.
@@ -155,6 +155,20 @@ async function planMission(missionText) {
     }
   }
   return fallback;
+}
+
+// One-line price comparison + recommendation over the plan's options:
+// the cheapest fit, and why the pick is (or is not) that cheapest fit.
+function compareLine(options) {
+  if (!options || options.length === 0) return null;
+  const pick = options[0];
+  if (options.length === 1) return `Price check: only one genuine fit — ${pick.name} at $${pick.price.toFixed(2)}.`;
+  const cheapest = options.reduce((a, b) => (b.price < a.price ? b : a), options[0]);
+  const others = options.filter((o) => o.id !== pick.id).map((o) => `${o.name} $${o.price.toFixed(2)}`).join(' · ');
+  if (cheapest.id === pick.id) {
+    return `Price check: Jaja's pick is also the cheapest fit at $${pick.price.toFixed(2)} (alternatives: ${others}). Recommended.`;
+  }
+  return `Price check: cheapest fit is ${cheapest.name} at $${cheapest.price.toFixed(2)}, but Jaja recommends ${pick.name} at $${pick.price.toFixed(2)} — a closer match for this mission (alternatives: ${others}).`;
 }
 
 // --- Diary & pleas -----------------------------------------------------------
@@ -235,4 +249,4 @@ async function composePlea(state) {
   return { amount, text: (llm && llm.text) || fallbackText };
 }
 
-module.exports = { planMission, mockPlan, writeDiary, writeDiaryAsync, composePlea, scoreItem };
+module.exports = { planMission, mockPlan, writeDiary, writeDiaryAsync, composePlea, scoreItem, compareLine };
