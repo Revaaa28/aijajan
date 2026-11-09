@@ -249,3 +249,36 @@ footer strong { color: var(--ink-soft); }
 .cat-item-meta { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-faint); }
 .cat-sub { background: #fdeee7; color: #c24e1d; border-radius: 999px; padding: 0 7px; font-size: 11px; font-weight: 700; }
 .cat-item-price { font-size: 14px; font-weight: 800; color: var(--blue-deep); }
+
+/* --- How it works strip ------------------------------------------------------ */
+.steps {
+  max-width: 1180px; margin: 0 auto; padding: 16px 24px 0;
+  display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap;
+}
+.step {
+  flex: 1 1 220px; display: flex; gap: 11px; align-items: flex-start;
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px;
+}
+.step-n {
+  flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--blue-deep); color: #fff; font-weight: 800; font-size: 14px;
+  display: grid; place-items: center;
+}
+.step strong { display: block; font-size: 14.5px; color: var(--ink); }
+.step span { font-size: 13px; color: var(--ink-soft); line-height: 1.45; }
+.step-arrow { align-self: center; color: var(--ink-faint); font-weight: 800; }
+.v-allow { color: var(--good); } .v-ask { color: #d98e00; } .v-block { color: #d33a2c; }
+@media (max-width: 700px) { .step-arrow { display: none; } .steps { padding: 14px 16px 0; } }
+
+/* --- Phone order: mission → rules → diary → catalog → audit ------------------- */
+@media (max-width: 920px) {
+  .grid { display: flex; flex-direction: column; }
+  .col-main, .col-side { display: contents; }
+  .mission-card { order: 1; }
+  #pendingZone { order: 2; }
+  #pleaZone { order: 3; }
+  .rules-card { order: 4; }
+  .diary-card { order: 5; }
+  .catalog-card { order: 6; }
+  .audit-card { order: 7; }
+}
