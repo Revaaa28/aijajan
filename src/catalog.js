@@ -42,11 +42,11 @@ const ITEMS = [
   { id: 'mus-03', name: 'StreamTunes Premium — 1 month', category: 'music', price: 9.99, vendor: 'StreamTunes', subscription: true, blurb: 'All the music, none of the ownership, auto-renews monthly.' },
 
   // --- Food & drinks (the original jajan) --------------------------------------
-  { id: 'fod-01', name: 'Nasi Padang lunch voucher', category: 'food', price: 6.50, vendor: 'DapurOnline', subscription: false, blurb: 'Rendang, sayur, sambal ijo. Delivered hot, gone in ten minutes.' },
-  { id: 'fod-02', name: 'Kopi susu literan voucher', category: 'food', price: 7.25, vendor: 'KopiKala', subscription: false, blurb: 'One litre of iced milk coffee. Productivity in a bottle.' },
-  { id: 'fod-03', name: 'Martabak manis voucher', category: 'food', price: 5.75, vendor: 'JajanMart', subscription: false, blurb: 'Thick sweet pancake, chocolate and cheese. The classic jajan.' },
+  { id: 'fod-01', name: 'Nasi goreng voucher', category: 'food', price: 6.50, vendor: 'DapurOnline', subscription: false, blurb: 'Indonesia’s world-famous fried rice, wok-tossed, extra sambal. Icon status: earned.' },
+  { id: 'fod-02', name: 'Iced milk coffee — 1 litre voucher', category: 'food', price: 7.25, vendor: 'KopiKala', subscription: false, blurb: 'One litre of Indonesian iced milk coffee. Productivity in a bottle.' },
+  { id: 'fod-03', name: 'Bakso voucher — meatball soup', category: 'food', price: 5.75, vendor: 'JajanMart', subscription: false, blurb: 'Beef meatball soup with noodles and sambal. The other Indonesian icon.' },
   { id: 'fod-04', name: 'Bubble tea voucher — 2 cups', category: 'food', price: 4.50, vendor: 'TehSegar', subscription: false, blurb: 'Brown sugar boba for you and your favorite human.' },
-  { id: 'fod-05', name: 'Weekly groceries basket voucher', category: 'food', price: 18.50, vendor: 'WarungKu', subscription: false, blurb: 'Rice, eggs, veggies and sambal essentials from the neighborhood warung, delivered.' },
+  { id: 'fod-05', name: 'Weekly groceries basket voucher', category: 'food', price: 18.50, vendor: 'WarungKu', subscription: false, blurb: 'Rice, eggs, veggies and chili essentials from the neighborhood market, delivered.' },
 
   // --- Transport ---------------------------------------------------------------
   { id: 'tra-01', name: 'Ride-hail voucher — 5 trips', category: 'transport', price: 5.50, vendor: 'AngkutApp', subscription: false, blurb: 'Ojek and car rides across town. Rain-proof plans.' },
@@ -54,19 +54,19 @@ const ITEMS = [
   { id: 'tra-03', name: 'E-toll balance top-up', category: 'transport', price: 7.00, vendor: 'JalanKu', subscription: false, blurb: 'So the toll gate never judges you again.' },
 
   // --- Bills & top-ups -----------------------------------------------------------
-  { id: 'bil-01', name: 'Token listrik voucher — 50 kWh', category: 'bills', price: 9.25, vendor: 'ListrikKu', subscription: false, blurb: 'PLN prepaid electricity token. Silences the dying-meter beep.' },
-  { id: 'bil-02', name: 'Pulsa + 25 GB data package', category: 'bills', price: 6.75, vendor: 'PulsaKu', subscription: false, blurb: 'Phone credit and a month of scrolling insurance.' },
+  { id: 'bil-01', name: 'Prepaid electricity token — 50 kWh', category: 'bills', price: 9.25, vendor: 'ListrikKu', subscription: false, blurb: 'Prepaid electricity credit for the home meter. Silences the dying-meter beep.' },
+  { id: 'bil-02', name: 'Mobile credit + 25 GB data package', category: 'bills', price: 6.75, vendor: 'PulsaKu', subscription: false, blurb: 'Phone credit and a month of scrolling insurance.' },
   { id: 'bil-03', name: 'Home internet bill voucher', category: 'bills', price: 19.00, vendor: 'NetRumah', subscription: false, blurb: 'One month of home internet, paid before the reminder SMS gets dramatic.' },
 
   // --- Health ----------------------------------------------------------------------
   { id: 'hea-01', name: 'Pharmacy voucher', category: 'health', price: 12.00, vendor: 'SehatKu', subscription: false, blurb: 'For whatever the season is handing out. Get well soon.' },
-  { id: 'hea-02', name: 'Vitamin & jamu wellness pack', category: 'health', price: 5.25, vendor: 'SehatKu', subscription: false, blurb: 'Vitamins plus traditional jamu. Grandma approved.' },
+  { id: 'hea-02', name: 'Vitamin & herbal tonic pack', category: 'health', price: 5.25, vendor: 'SehatKu', subscription: false, blurb: 'Vitamins plus traditional Indonesian herbal tonic. Grandma approved.' },
   { id: 'hea-03', name: 'Gym day pass', category: 'health', price: 4.75, vendor: 'KuatKu', subscription: false, blurb: 'One day of good intentions, fully equipped.' },
 
   // --- Home & daily ------------------------------------------------------------------
-  { id: 'hom-01', name: 'Laundry kiloan voucher — 5 kg', category: 'home', price: 3.80, vendor: 'CuciKilat', subscription: false, blurb: 'Wash, iron, fold. Smells like a fresh start.' },
+  { id: 'hom-01', name: 'Laundry voucher — 5 kg wash & fold', category: 'home', price: 3.80, vendor: 'CuciKilat', subscription: false, blurb: 'Wash, iron, fold — priced by the kilo. Smells like a fresh start.' },
   { id: 'hom-02', name: 'Home cleaning voucher — 2 hours', category: 'home', price: 13.50, vendor: 'BersihKu', subscription: false, blurb: 'Two hours of someone else making it spotless.' },
-  { id: 'hom-03', name: 'Galon water refill voucher x4', category: 'home', price: 3.20, vendor: 'SegarKu', subscription: false, blurb: 'Four drinking-water refills. Hydration is a lifestyle.' },
+  { id: 'hom-03', name: 'Drinking water refill voucher x4', category: 'home', price: 3.20, vendor: 'SegarKu', subscription: false, blurb: 'Four big-jug drinking water refills. Hydration is a lifestyle.' },
 
   // --- Design assets ------------------------------------------------------------
   { id: 'des-01', name: 'Icon pack — 2,000 hand-drawn icons', category: 'design', price: 18.00, vendor: 'PixelPasar', subscription: false, blurb: 'Every icon you will ever need, including three kinds of rocket.' },
