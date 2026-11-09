@@ -172,6 +172,7 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
 .step.verdict-BLOCK { border-color: #f6c3cc; border-left-color: var(--bad); background: var(--bad-bg); }
 .step.paid { border-color: #bfe8d2; border-left-color: var(--good); background: var(--good-bg); font-weight: 700; }
 .step.pending { border-color: #f3ddab; border-left-color: var(--warn); background: var(--warn-bg); }
+.step.nomatch { border-color: #d8dce9; border-left-color: var(--ink-faint); background: #f4f6fb; font-weight: 600; color: var(--ink-soft); }
 .decision {
   font-weight: 800; letter-spacing: .04em; font-size: 12px; padding: 2.5px 9px;
   border-radius: 999px; vertical-align: 1px; white-space: nowrap;

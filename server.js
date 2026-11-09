@@ -125,6 +125,18 @@ app.post('/api/mission', async (req, res) => {
   const steps = [];
   try {
     const plan = await agent.planMission(text);
+
+    // Nothing in the catalog genuinely fits: Jaja declines, spends nothing.
+    if (plan.noMatch) {
+      steps.push({ kind: 'found', text: `Scouted ${ITEMS.length} listings. Nothing genuinely fits this mission.` });
+      steps.push({ kind: 'pitch', text: plan.pitch });
+      steps.push({ kind: 'nomatch', text: `No purchase. Jaja only buys what the catalog honestly offers — and the policy engine never even had to wake up.` });
+      store.audit(state, 'no-match', `Mission "${text}" — nothing in the catalog fits; no purchase.`);
+      state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: await agent.writeDiaryAsync('nomatch', { mission: text }) });
+      store.save(state);
+      return res.json({ steps, outcome: 'no-match', state: publicState(state) });
+    }
+
     steps.push({ kind: 'found', text: `Scouted ${ITEMS.length} listings. Top finds: ${plan.options.map((o) => `${o.name} ($${o.price.toFixed(2)})`).join(' · ')}` });
     steps.push({ kind: 'pitch', text: plan.pitch });
 

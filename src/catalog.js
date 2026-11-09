@@ -41,6 +41,13 @@ const ITEMS = [
   { id: 'mus-02', name: 'Beat pack — lo-fi loops vol. 3', category: 'music', price: 11.00, vendor: 'BeatBazaar', subscription: false, blurb: 'Royalty-free loops for videos and streams.' },
   { id: 'mus-03', name: 'StreamTunes Premium — 1 month', category: 'music', price: 9.99, vendor: 'StreamTunes', subscription: true, blurb: 'All the music, none of the ownership, auto-renews monthly.' },
 
+  // --- Food & drinks (the original jajan) --------------------------------------
+  { id: 'fod-01', name: 'Nasi Padang lunch voucher', category: 'food', price: 6.50, vendor: 'DapurOnline', subscription: false, blurb: 'Rendang, sayur, sambal ijo. Delivered hot, gone in ten minutes.' },
+  { id: 'fod-02', name: 'Kopi susu literan voucher', category: 'food', price: 7.25, vendor: 'KopiKala', subscription: false, blurb: 'One litre of iced milk coffee. Productivity in a bottle.' },
+  { id: 'fod-03', name: 'Martabak manis voucher', category: 'food', price: 5.75, vendor: 'JajanMart', subscription: false, blurb: 'Thick sweet pancake, chocolate and cheese. The classic jajan.' },
+  { id: 'fod-04', name: 'Bubble tea voucher — 2 cups', category: 'food', price: 4.50, vendor: 'TehSegar', subscription: false, blurb: 'Brown sugar boba for you and your favorite human.' },
+  { id: 'fod-05', name: 'Weekly groceries basket voucher', category: 'food', price: 18.50, vendor: 'WarungKu', subscription: false, blurb: 'Rice, eggs, veggies and sambal essentials from the neighborhood warung, delivered.' },
+
   // --- Design assets ------------------------------------------------------------
   { id: 'des-01', name: 'Icon pack — 2,000 hand-drawn icons', category: 'design', price: 18.00, vendor: 'PixelPasar', subscription: false, blurb: 'Every icon you will ever need, including three kinds of rocket.' },
   { id: 'des-02', name: 'Font bundle — "Kala Senja" serif family', category: 'design', price: 22.00, vendor: 'PixelPasar', subscription: false, blurb: 'A gorgeous serif with Indonesian diacritics done right.' },

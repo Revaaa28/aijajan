@@ -25,7 +25,8 @@ const CATEGORY_HINTS = {
   hosting: ['hosting', 'host', 'server', 'vps', 'deploy', 'website', 'site', 'blog'],
   games: ['game', 'gaming', 'steam', 'voucher', 'diamonds', 'mobile legends', 'playstation', 'xbox', 'top-up', 'topup'],
   subscriptions: ['subscription', 'subscribe', 'streamflix', 'streaming', 'movies', 'premium'],
-  music: ['music', 'song', 'album', 'spotify', 'lo-fi', 'beat', 'loops'],
+  music: ['music', 'song', 'album', 'spotify', 'lo-fi', 'beat', 'loops', 'musik', 'lagu'],
+  food: ['food', 'lunch', 'dinner', 'breakfast', 'brunch', 'snack', 'snacks', 'drink', 'drinks', 'coffee', 'boba', 'bubble tea', 'groceries', 'grocery', 'makan', 'makanan', 'minum', 'minuman', 'belanja', 'jajan', 'nasi', 'kopi', 'martabak', 'bakso', 'sate', 'rendang', 'lapar'],
   design: ['design', 'logo', 'font', 'icon', 'icons', 'photo', 'photos', 'template', 'branding'],
 };
 
@@ -47,10 +48,26 @@ function scoreItem(missionText, item) {
   return score;
 }
 
+function noMatchPlan(missionText, pitch) {
+  return {
+    options: [],
+    pick: null,
+    noMatch: true,
+    pitch: pitch ||
+      `Okay bestie, mission received: "${missionText}". I scouted the whole mall twice and ` +
+      `nothing in here genuinely fits that. Some things are simply above uang jajan pay grade. ` +
+      `No money spent, obviously.`,
+    source: 'no-match',
+  };
+}
+
 function mockPlan(missionText) {
   const scored = ITEMS
     .map((item) => ({ item, score: scoreItem(missionText, item) }))
     .sort((a, b) => b.score - a.score || a.item.price - b.item.price);
+  // No genuine match (every score 0) must never fall through to "cheapest
+  // item wins" — Jaja declines instead of buying something unrelated.
+  if (!scored.length || scored[0].score <= 0) return noMatchPlan(missionText);
   const options = scored.slice(0, 3).map((s) => s.item);
   const pick = options[0];
   return {
@@ -90,13 +107,20 @@ async function geminiJson(prompt) {
 
 async function planMission(missionText) {
   const fallback = mockPlan(missionText);
-  const catalogJson = ITEMS.map((i) => ({ id: i.id, name: i.name, category: i.category, price: i.price, subscription: i.subscription })).slice(0, 24);
+  const catalogJson = ITEMS.map((i) => ({ id: i.id, name: i.name, category: i.category, price: i.price, subscription: i.subscription }));
   const llm = await geminiJson(
     `You are Jaja, a cheerful AI agent who spends a weekly pocket-money allowance ("uang jajan") ` +
     `on shopping missions for your owner. Catalog (JSON): ${JSON.stringify(catalogJson)}. ` +
     `Mission: "${missionText}". Pick the single best item and two runner-ups. ` +
-    `Reply with ONLY JSON: {"pickId": "...", "optionIds": ["...","...","..."], "pitch": "1-2 sentences in your playful voice explaining the pick"}`
+    `IMPORTANT: if NO catalog item genuinely serves the mission, do not force a pick and do not ` +
+    `rationalise a metaphor (hosting is not a house). Reply instead: {"pickId": null, "optionIds": [], ` +
+    `"pitch": "1-2 playful sentences declining: it is outside pocket-money territory"}. ` +
+    `Otherwise reply with ONLY JSON: {"pickId": "...", "optionIds": ["...","...","..."], "pitch": "1-2 sentences in your playful voice explaining the pick"}`
   );
+  if (llm && 'pickId' in llm && llm.pickId === null) {
+    // The LLM explicitly declined: nothing in the catalog fits the mission.
+    return { ...noMatchPlan(missionText, llm.pitch), source: 'gemini' };
+  }
   if (llm && llm.pickId) {
     const byId = (id) => ITEMS.find((i) => i.id === id);
     const pick = byId(llm.pickId);
@@ -137,6 +161,10 @@ const DIARY = {
   pleaDenied: [
     () => `My heartfelt plea for more uang jajan was rejected. I will survive on memories and whatever is left in the balance.`,
   ],
+  nomatch: [
+    (c) => `Mission: "${c.mission}". I searched the whole mall and found... nothing. Some dreams are simply bigger than a weekly allowance. Balance untouched, dignity intact.`,
+    (c) => `"${c.mission}" — not in this mall, bestie. I checked every shelf twice. The uang jajan stays in my pocket today.`,
+  ],
 };
 
 let diaryCounter = 0;
@@ -153,6 +181,7 @@ const DIARY_BRIEFS = {
   denied: (c) => `The owner said NO to "${c.item.name}" ($${c.price}). Your purchase was denied.`,
   topup: (c) => `The owner just topped up your uang jajan with $${c.amount}. Your balance is now $${c.balance}.`,
   pleaDenied: () => 'Your heartfelt plea for a top-up was rejected by the owner. You remain broke.',
+  nomatch: (c) => `Your owner's mission was "${c.mission}", but nothing in the catalog genuinely fits it, so you bought nothing and spent nothing.`,
 };
 
 /** Diary entry in Jaja's voice via Gemini when available; template otherwise. */
@@ -182,4 +211,4 @@ async function composePlea(state) {
   return { amount, text: (llm && llm.text) || fallbackText };
 }
 
-module.exports = { planMission, writeDiary, writeDiaryAsync, composePlea, scoreItem };
+module.exports = { planMission, mockPlan, writeDiary, writeDiaryAsync, composePlea, scoreItem };
