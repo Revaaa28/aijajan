@@ -33,6 +33,13 @@ test('buying a house is still declined (a house is not home services)', () => {
   assert.equal(mockPlan('beli rumah untuk keluarga').noMatch, true);
 });
 
+test('fallback planner understands Indonesian at item level', () => {
+  assert.equal(mockPlan('beli kopi susu').pick.id, 'fod-02');
+  assert.equal(mockPlan('beli galon air').pick.id, 'hom-03');
+  assert.equal(mockPlan('cuci baju seminggu numpuk').pick.id, 'hom-01');
+  assert.equal(mockPlan('nasi goreng satu porsi').pick.id, 'fod-01');
+});
+
 test('domain mission still picks a domain', () => {
   const plan = mockPlan('Buy me a cheap domain for my bakery');
   assert.equal(plan.pick.category, 'domains');

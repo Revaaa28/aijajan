@@ -38,6 +38,23 @@ function tokenize(text) {
   return text.toLowerCase().split(/[^a-z0-9.]+/).filter(Boolean);
 }
 
+// Mini Indonesian glossary for the deterministic fallback planner: the LLM
+// understands Indonesian natively, the keyword scorer does not — so common
+// Indonesian words get an English gloss APPENDED (original text is kept, so
+// iconic names like "nasi goreng" still match). Not a translator; just the
+// catalog's vocabulary in two languages.
+const ID_WORDS = {
+  kopi: 'coffee', susu: 'milk', teh: 'tea', listrik: 'electricity', pulsa: 'mobile credit',
+  kuota: 'data', galon: 'water refill', cuci: 'laundry', setrika: 'iron', obat: 'medicine',
+  makan: 'food', minum: 'drink', belanja: 'groceries', bensin: 'fuel', ojek: 'ride',
+  perjalanan: 'trip', tagihan: 'bill', jamu: 'herbal tonic', air: 'water', baju: 'clothes',
+};
+
+function withIdGloss(text) {
+  const gloss = tokenize(text).map((w) => ID_WORDS[w]).filter(Boolean).join(' ');
+  return gloss ? `${text} ${gloss}` : text;
+}
+
 /** Deterministic scorer: category hint hits weigh most, then name words. */
 function scoreItem(missionText, item) {
   const text = missionText.toLowerCase();
@@ -66,8 +83,9 @@ function noMatchPlan(missionText, pitch) {
 }
 
 function mockPlan(missionText) {
+  const scoredText = withIdGloss(missionText);
   const scored = ITEMS
-    .map((item) => ({ item, score: scoreItem(missionText, item) }))
+    .map((item) => ({ item, score: scoreItem(scoredText, item) }))
     .sort((a, b) => b.score - a.score || a.item.price - b.item.price);
   // No genuine match (every score 0) must never fall through to "cheapest
   // item wins" — Jaja declines instead of buying something unrelated.
