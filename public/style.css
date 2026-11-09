@@ -286,3 +286,20 @@ footer strong { color: var(--ink-soft); }
 .how-step-arrow { align-self: center; color: var(--ink-faint); font-weight: 800; }
 .v-allow { color: var(--good); } .v-ask { color: #d98e00; } .v-block { color: #d33a2c; }
 @media (max-width: 700px) { .how-step-arrow { display: none; } .how-steps { padding: 14px 16px 0; } }
+
+/* --- Four-verdicts tour (always visible under the tabs) ----------------------- */
+.tour-card { margin-top: 2px; }
+.tour-note { font-size: 13.5px; color: var(--ink-faint); margin: 0 0 13px; }
+.tour-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+@media (max-width: 560px) { .tour-grid { grid-template-columns: 1fr; } }
+.tour-chip {
+  display: flex; align-items: center; gap: 10px; text-align: left; cursor: pointer;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 12px;
+  padding: 11px 13px; font: inherit; font-size: 14px; font-weight: 600; color: var(--ink);
+}
+.tour-chip:hover { border-color: var(--blue); background: #fff; }
+.vtag { flex: 0 0 auto; border-radius: 999px; padding: 2px 9px; font-size: 11.5px; font-weight: 800; letter-spacing: .02em; }
+.vtag-allow { background: var(--good-bg); color: var(--good); }
+.vtag-ask { background: var(--warn-bg); color: #9a6a00; }
+.vtag-block { background: var(--bad-bg); color: var(--bad); }
+.vtag-none { background: #eceff6; color: var(--ink-soft); }
