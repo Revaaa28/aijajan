@@ -1,6 +1,7 @@
 /* AIJajan — fresh pro theme. Font: Plus Jakarta Sans (designed in Jakarta). */
 :root {
   --ink: #101a33;
+  --font-display: "Bricolage Grotesque", "Plus Jakarta Sans", sans-serif;
   --ink-soft: #4a5470;
   --ink-faint: #8a93ad;
   --bg: #f2f5fc;
@@ -303,3 +304,8 @@ footer strong { color: var(--ink-soft); }
 .vtag-ask { background: var(--warn-bg); color: #9a6a00; }
 .vtag-block { background: var(--bad-bg); color: var(--bad); }
 .vtag-none { background: #eceff6; color: var(--ink-soft); }
+
+/* --- Display font: Bricolage Grotesque for the face, Jakarta Sans for the work --- */
+.brand h1, .card h2, .pending-card h3, .plea-card h3, .balance,
+.how-step strong, .tab, .cat-item-price, .tour-chip { font-family: var(--font-display); }
+.balance { letter-spacing: -.01em; }
