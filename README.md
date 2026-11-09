@@ -19,6 +19,13 @@ Built for the **PayPal AI Hackathon** (targeting *Most Creative*, with an eye
 on *Best Use of Agentic Commerce*). All money in the demo is PayPal
 **sandbox** money — no real funds ever move.
 
+## Live demo
+
+**https://aijajan.onrender.com** — hosted on Render (free tier: the first
+load after idle can take ~50 seconds while the service wakes up). The hosted
+demo runs in mock mode; to see real PayPal sandbox payouts and the Gemini
+voice, run it locally with your own keys as described below.
+
 ## What to try in the demo
 
 1. **Small mission** — "Buy me a cheap domain for my bakery" → Jaja pays on
