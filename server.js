@@ -173,8 +173,19 @@ app.post('/api/mission', async (req, res) => {
       return res.json({ steps, outcome: 'ask', pendingId: pending.id, verdict, state: publicState(state) });
     }
 
-    // ALLOW — pay right away.
-    const result = await executePayment(state, chosen, verdict);
+    // ALLOW — pay right away. A PayPal failure is a first-class outcome:
+    // no money moves, the balance is untouched, the failure is audited.
+    let result;
+    try {
+      result = await executePayment(state, chosen, verdict);
+    } catch (payErr) {
+      console.error(payErr);
+      store.audit(state, 'payment-failed', `Payment for "${chosen.name}" ($${chosen.price.toFixed(2)}) failed at PayPal: ${String(payErr.message || payErr).slice(0, 140)}`);
+      store.save(state);
+      steps.push({ kind: 'nomatch', text: `Payment failed at PayPal — no money moved, balance unchanged. The failure is in the audit log; the mission can be retried.` });
+      return res.json({ steps, outcome: 'payment-failed', state: publicState(state) });
+    }
+    store.save(state); // record the payment before any diary rendering
     state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: await agent.writeDiaryAsync('paid', { item: chosen, price: chosen.price.toFixed(2), balance: state.balance.toFixed(2), rule: verdict.rule }) });
     store.save(state);
     steps.push({ kind: 'paid', text: `Paid via PayPal (${paypal.mode}). Order ${result.orderId}. New balance $${state.balance.toFixed(2)}.` });
@@ -198,12 +209,18 @@ app.post('/api/approve', async (req, res) => {
   }
   try {
     const result = await executePayment(state, pending.item, null);
+    store.save(state); // record the payment before any diary rendering
     state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: await agent.writeDiaryAsync('paid', { item: pending.item, price: pending.item.price.toFixed(2), balance: state.balance.toFixed(2), rule: 'owner-approved' }) });
     store.save(state);
     return res.json({ outcome: 'paid', order: result, state: publicState(state) });
   } catch (err) {
+    // Payment failed after approval: put the request back so the owner can
+    // retry, audit the failure, and leave the balance untouched.
     console.error(err);
-    return res.status(500).json({ error: String(err.message || err) });
+    state.pending.push(pending);
+    store.audit(state, 'payment-failed', `Approved payment for "${pending.item.name}" ($${pending.item.price.toFixed(2)}) failed at PayPal: ${String(err.message || err).slice(0, 140)} — request restored for retry.`);
+    store.save(state);
+    return res.status(502).json({ error: `Payment failed at PayPal — no money moved. The approval is back in the queue so you can retry. (${String(err.message || err).slice(0, 120)})`, state: publicState(state) });
   }
 });
 
@@ -234,13 +251,18 @@ app.post('/api/plea/approve', async (req, res) => {
   const state = store.load();
   if (!state.plea) return res.status(404).json({ error: 'No plea to approve.' });
   const amount = state.plea.amount;
-  state.plea = null;
-  const result = await paypal.topUp(amount);
-  state.balance = store.round2(state.balance + amount);
-  store.audit(state, 'topup', `Owner approved the plea — topped up $${amount.toFixed(2)} (${result.payoutId})`, { amount });
-  state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: await agent.writeDiaryAsync('topup', { amount: amount.toFixed(2), balance: state.balance.toFixed(2) }) });
-  store.save(state);
-  res.json({ outcome: 'topped-up', payout: result, state: publicState(state) });
+  try {
+    const result = await paypal.topUp(amount);
+    state.plea = null;
+    state.balance = store.round2(state.balance + amount);
+    store.audit(state, 'topup', `Owner approved the plea — topped up $${amount.toFixed(2)} (${result.payoutId})`, { amount });
+    state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: await agent.writeDiaryAsync('topup', { amount: amount.toFixed(2), balance: state.balance.toFixed(2) }) });
+    store.save(state);
+    res.json({ outcome: 'topped-up', payout: result, state: publicState(state) });
+  } catch (err) {
+    console.error(err);
+    return res.status(502).json({ error: `Top-up failed at PayPal — the plea is still open and no money moved. (${String(err.message || err).slice(0, 120)})` });
+  }
 });
 
 app.post('/api/plea/deny', async (req, res) => {
@@ -257,13 +279,18 @@ app.post('/api/topup', async (req, res) => {
   const amount = Number((req.body || {}).amount);
   if (!Number.isFinite(amount) || amount <= 0 || amount > 500) return res.status(400).json({ error: 'Top-up amount must be between $0 and $500.' });
   const state = store.load();
-  const result = await paypal.topUp(amount);
-  state.balance = store.round2(state.balance + amount);
-  if (state.plea && state.balance >= 5) state.plea = null;
-  store.audit(state, 'topup', `Owner topped up $${amount.toFixed(2)} (${result.payoutId})`, { amount });
-  state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: await agent.writeDiaryAsync('topup', { amount: amount.toFixed(2), balance: state.balance.toFixed(2) }) });
-  store.save(state);
-  res.json({ outcome: 'topped-up', payout: result, state: publicState(state) });
+  try {
+    const result = await paypal.topUp(amount);
+    state.balance = store.round2(state.balance + amount);
+    if (state.plea && state.balance >= 5) state.plea = null;
+    store.audit(state, 'topup', `Owner topped up $${amount.toFixed(2)} (${result.payoutId})`, { amount });
+    state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: await agent.writeDiaryAsync('topup', { amount: amount.toFixed(2), balance: state.balance.toFixed(2) }) });
+    store.save(state);
+    res.json({ outcome: 'topped-up', payout: result, state: publicState(state) });
+  } catch (err) {
+    console.error(err);
+    return res.status(502).json({ error: `Top-up failed at PayPal — no money moved. (${String(err.message || err).slice(0, 120)})` });
+  }
 });
 
 app.post('/api/freeze', (req, res) => {
