@@ -99,6 +99,8 @@ input[type="text"], input[type="number"] {
 .rules-card label input[type="number"] { float: right; width: 90px; }
 .rules-card label.check { display: flex; gap: 8px; align-items: center; clear: both; padding-top: 6px; }
 .rules-note { font-size: 13px; color: #6b7194; margin: 0 0 6px; }
+.rules-card textarea { width: 100%; box-sizing: border-box; border: 1px solid #d8dbe8; border-radius: 8px; padding: 8px; font: inherit; font-size: 13px; resize: vertical; }
+.rule-understood { font-size: 13px; color: #2e7d4f; margin: 6px 0 10px; line-height: 1.45; }
 
 .diary-entry { border-bottom: 1px dashed var(--line); padding: 9px 0; font-size: 14px; line-height: 1.5; }
 .diary-entry:last-child { border-bottom: 0; }

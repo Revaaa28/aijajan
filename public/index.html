@@ -68,6 +68,11 @@
     <div class="card rules-card">
       <h2>The rules <span class="sub">— Jaja cannot break these</span></h2>
       <p class="rules-note">Enforced by a deterministic policy engine in plain code — not by the AI. Jaja proposes; the rules dispose.</p>
+      <label>Teach Jaja in plain words
+        <textarea id="ruleText" rows="3" placeholder="ask me first above $15, no subscriptions, games max $20 a month, never spend more than $40"></textarea>
+      </label>
+      <button id="teachRules" class="btn btn-primary">Teach Jaja</button>
+      <div id="ruleUnderstood" class="rule-understood"></div>
       <label>Auto-allow up to ($)
         <input type="number" id="ruleMax" step="1" min="0">
       </label>

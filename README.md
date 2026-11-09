@@ -43,7 +43,7 @@ public/            Single-page UI (no build step): mission input, live
 server.js          Express API + tiny .env loader
 src/policy.js      The deterministic policy engine: evaluate(purchase, ctx)
                    -> { decision: ALLOW|ASK|BLOCK, rule, reason }
-src/catalog.js     The "mall": 24 digital-goods listings (domains, hosting,
+src/catalog.js     The "mall": 25 digital-goods listings (domains, hosting,
                    game vouchers, subscriptions, music, design assets)
 src/agent.js       Jaja: mission planner + diary writer + plea composer.
                    Uses Gemini when GEMINI_API_KEY is set, otherwise a
@@ -55,12 +55,17 @@ src/paypal.js      PayPal sandbox REST client (OAuth + Payouts API).
                    ORDER_NOT_APPROVED). Mock mode simulates everything.
 src/store.js       JSON-file state: balance, policy, audit, diary, pending
                    approvals, plea, frozen flag, monthly spend per category
-test/policy.test.js  node:test unit tests for the policy engine
+src/rulesParser.js Teaches rules from plain language ("ask me first above
+                   $15, no subscriptions, games max $20 a month") into the
+                   structured fields below — deterministic, no LLM.
+test/              node:test unit tests for the policy engine + rules parser
 ```
 
 ### The policy engine
 
-Owner rules are structured fields (edited in the UI):
+Owner rules are structured fields — set either with the form in the UI or by
+typing them in plain words ("Teach Jaja in plain words"), which
+`src/rulesParser.js` translates deterministically:
 
 | Rule | Effect |
 | --- | --- |

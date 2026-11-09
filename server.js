@@ -82,6 +82,28 @@ app.get('/api/state', (req, res) => {
   res.json(publicState(store.load()));
 });
 
+app.post('/api/policy/text', (req, res) => {
+  const { parseRules } = require('./src/rulesParser');
+  const text = String((req.body || {}).text || '').trim();
+  if (!text) return res.status(400).json({ error: 'Rule text is required.' });
+  const { updates, understood } = parseRules(text);
+  if (!understood.length) {
+    return res.status(422).json({ error: 'Jaja could not find any rules in that text. Try: "ask me first above $15, no subscriptions, games max $20 a month".' });
+  }
+  const state = store.load();
+  for (const key of ['maxPerPurchase', 'askAbove', 'weeklyAllowance']) {
+    if (updates[key] !== undefined) state.policy[key] = updates[key];
+  }
+  if (updates.categoryCaps) state.policy.categoryCaps = { ...state.policy.categoryCaps, ...updates.categoryCaps };
+  if (updates.blockedCategories) {
+    state.policy.blockedCategories = [...new Set([...state.policy.blockedCategories, ...updates.blockedCategories])];
+  }
+  if (typeof updates.blockSubscriptions === 'boolean') state.policy.blockSubscriptions = updates.blockSubscriptions;
+  store.audit(state, 'policy', `Owner taught rules in plain words: "${text}" → ${understood.join(' ')}`);
+  store.save(state);
+  res.json({ understood, state: publicState(state) });
+});
+
 app.post('/api/policy', (req, res) => {
   const state = store.load();
   const b = req.body || {};

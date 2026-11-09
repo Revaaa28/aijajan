@@ -159,6 +159,18 @@ $('saveRules').addEventListener('click', async () => {
     blockSubscriptions: $('ruleBlockSubs').checked,
   }));
 });
+$('teachRules').addEventListener('click', async () => {
+  const box = $('ruleUnderstood');
+  const text = $('ruleText').value.trim();
+  if (!text) return;
+  try {
+    const r = await api('/api/policy/text', { text });
+    box.innerHTML = '<strong>Jaja understood:</strong><br>' + r.understood.map(esc).join('<br>');
+    render(r.state);
+  } catch (err) {
+    box.innerHTML = esc(err.message);
+  }
+});
 $('resetBtn').addEventListener('click', async () => {
   $('feed').innerHTML = '';
   render(await api('/api/reset', {}));
