@@ -1,3 +1,5 @@
+![AIJajan — An AI with Pocket Money](docs/banner.png)
+
 # AIJajan — an AI with pocket money
 
 > **Jajan** *(n.)* — Indonesian for spending your pocket money on little treats.

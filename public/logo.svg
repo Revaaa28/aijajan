@@ -1,27 +1,56 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
-  <!-- coin hat -->
-  <rect x="115" y="52" width="10" height="12" rx="4" fill="#e8a100"/>
-  <circle cx="120" cy="38" r="20" fill="#ffc53d"/>
-  <circle cx="120" cy="38" r="20" fill="none" stroke="#e8a100" stroke-width="4"/>
-  <circle cx="120" cy="38" r="11.5" fill="none" stroke="#e8a100" stroke-width="3"/>
-  <!-- feet -->
-  <ellipse cx="84" cy="207" rx="17" ry="7" fill="#101a33"/>
-  <ellipse cx="152" cy="207" rx="17" ry="7" fill="#101a33"/>
-  <!-- body -->
-  <circle cx="118" cy="132" r="75" fill="#ffb25c"/>
-  <path d="M48 165 a75 75 0 0 0 140 0 a95 55 0 0 1 -140 0 z" fill="#f79a3d" opacity="0.5"/>
-  <!-- arm -->
-  <ellipse cx="188" cy="150" rx="11" ry="17" fill="#f79a3d" transform="rotate(-18 188 150)"/>
-  <!-- shopping bag in hand -->
-  <path d="M176 138 q9 -13 18 0" fill="none" stroke="#003087" stroke-width="5" stroke-linecap="round"/>
-  <rect x="164" y="140" width="42" height="38" rx="7" fill="#0070e0"/>
-  <circle cx="185" cy="159" r="5" fill="#ffffff" opacity="0.85"/>
-  <!-- face -->
-  <circle cx="92" cy="124" r="7.5" fill="#101a33"/>
-  <circle cx="144" cy="124" r="7.5" fill="#101a33"/>
-  <circle cx="94.5" cy="121" r="2.6" fill="#ffffff"/>
-  <circle cx="146.5" cy="121" r="2.6" fill="#ffffff"/>
-  <path d="M104 143 q14 12 28 0" fill="none" stroke="#101a33" stroke-width="5.5" stroke-linecap="round"/>
-  <circle cx="70" cy="142" r="7.5" fill="#ff9d76" opacity="0.8"/>
-  <circle cx="166" cy="142" r="7.5" fill="#ff9d76" opacity="0.8"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 246">
+  <defs>
+    <clipPath id="dome"><path d="M62 72 C62 26 96 8 131 8 C166 8 200 26 200 72 Z"/></clipPath>
+    <clipPath id="torso"><rect x="84" y="164" width="94" height="66" rx="24"/></clipPath>
+  </defs>
+
+  <!-- orange swoosh + sparkle -->
+  <path d="M200 16 C228 20 246 38 250 60 C236 42 222 32 198 28 Z" fill="#ff8a1e"/>
+  <path d="M232 84 l3.2 8.8 8.8 3.2 -8.8 3.2 -3.2 8.8 -3.2 -8.8 -8.8 -3.2 8.8 -3.2 Z" fill="#ff8a1e"/>
+
+  <!-- torso -->
+  <rect x="84" y="164" width="94" height="66" rx="24" fill="#f2f6fd"/>
+  <g clip-path="url(#torso)">
+    <path d="M78 208 L184 178 L184 200 L78 230 Z" fill="#ff8a1e"/>
+  </g>
+  <rect x="84" y="164" width="94" height="66" rx="24" fill="none" stroke="#10265c" stroke-width="5.5"/>
+
+  <!-- thumbs-up hand (left) -->
+  <ellipse cx="89" cy="157" rx="8.5" ry="14.5" fill="#ffffff" stroke="#10265c" stroke-width="5" transform="rotate(14 89 157)"/>
+  <circle cx="71" cy="179" r="16" fill="#ffffff" stroke="#10265c" stroke-width="5"/>
+
+  <!-- head -->
+  <rect x="60" y="56" width="142" height="108" rx="46" fill="#ffffff" stroke="#10265c" stroke-width="5.5"/>
+  <!-- face screen -->
+  <rect x="75" y="70" width="112" height="80" rx="36" fill="#0b1e3f"/>
+  <!-- happy eyes -->
+  <path d="M94 112 q10 -13 20 0" fill="none" stroke="#3fd9f2" stroke-width="6.5" stroke-linecap="round"/>
+  <path d="M148 112 q10 -13 20 0" fill="none" stroke="#3fd9f2" stroke-width="6.5" stroke-linecap="round"/>
+  <!-- open smile -->
+  <path d="M119 124 q12 13 24 0 q-3 14 -12 14 q-9 0 -12 -14 Z" fill="#8fe9ff"/>
+
+  <!-- cap dome -->
+  <path d="M62 72 C62 26 96 8 131 8 C166 8 200 26 200 72 Z" fill="#ffffff"/>
+  <g clip-path="url(#dome)">
+    <path d="M62 72 C62 26 86 10 104 9 L104 72 Z" fill="#ff8a1e"/>
+    <rect x="124" y="0" width="13" height="80" fill="#ff8a1e" opacity="0.85"/>
+  </g>
+  <path d="M62 72 C62 26 96 8 131 8 C166 8 200 26 200 72" fill="none" stroke="#10265c" stroke-width="5.5" stroke-linecap="round"/>
+  <!-- cap brim -->
+  <path d="M160 58 C182 51 204 56 209 66 C213 75 202 81 187 79 L158 68 Z" fill="#16407e" stroke="#10265c" stroke-width="5" stroke-linejoin="round"/>
+
+  <!-- headphone (left) -->
+  <circle cx="56" cy="114" r="21" fill="#eaf6ff" stroke="#10265c" stroke-width="5.5"/>
+  <circle cx="56" cy="114" r="10.5" fill="#3fc6f2" stroke="#10265c" stroke-width="3.5"/>
+
+  <!-- phone with cart (right) -->
+  <g transform="translate(-4 0) rotate(-8 210 138)">
+    <rect x="188" y="92" width="46" height="82" rx="10" fill="#1b6fd0" stroke="#10265c" stroke-width="5"/>
+    <rect x="195" y="103" width="32" height="52" rx="5" fill="#2f8fe8"/>
+    <path d="M201 122 h22 l-3.2 12.5 h-15.5 Z" fill="none" stroke="#ffffff" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M198.5 116.5 h3.5 l1.8 16" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="206" cy="141" r="2.6" fill="#ffffff"/>
+    <circle cx="218" cy="141" r="2.6" fill="#ffffff"/>
+    <circle cx="211" cy="165" r="3" fill="#ffffff" opacity="0.75"/>
+  </g>
 </svg>

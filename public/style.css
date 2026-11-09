@@ -34,6 +34,16 @@ body {
 }
 ::selection { background: rgba(0, 112, 224, .22); }
 
+/* ---------- Batik accents (kawung motif, brand colours) ---------- */
+.batik-band {
+  height: 30px;
+  background-image: url('/batik-tile.svg');
+  background-size: 30px 30px;
+  background-repeat: repeat-x;
+  background-position: center;
+  opacity: .75;
+}
+
 /* ---------- Top bar ---------- */
 .topbar {
   position: sticky; top: 0; z-index: 20;
@@ -128,7 +138,13 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
 .btn-deny:hover:not(:disabled) { filter: brightness(.98); }
 
 /* ---------- Mission ---------- */
-.mission-card { border-top: 4px solid var(--accent); }
+.mission-card { position: relative; overflow: hidden; padding-top: 30px; }
+.mission-card::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 15px;
+  background-image: url('/batik-tile.svg');
+  background-size: 24px 24px; background-repeat: repeat-x; background-position: center top;
+  opacity: .6;
+}
 .mission-row { display: flex; gap: 10px; }
 .mission-row input { flex: 1; font-size: 15px; padding: 13px 15px; }
 .mission-row .btn { white-space: nowrap; }
