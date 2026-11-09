@@ -17,6 +17,7 @@
   --warn-bg: #fff7e2;
   --bad: #d6455b;
   --bad-bg: #fdeef1;
+  --input-bg: #fbfcfe;
   --radius: 18px;
   --shadow: 0 1px 2px rgba(16, 26, 51, .05), 0 10px 30px -12px rgba(16, 26, 51, .14);
   --shadow-lift: 0 2px 4px rgba(16, 26, 51, .06), 0 16px 38px -12px rgba(16, 26, 51, .22);
@@ -134,10 +135,10 @@ h1 .wordmark { background: linear-gradient(92deg, var(--blue-deep), var(--blue) 
 input[type="text"], input[type="number"], textarea {
   font: inherit; color: var(--ink);
   padding: 11px 13px; border: 1.5px solid var(--line); border-radius: 12px; font-size: 14px;
-  background: #fbfcfe; outline: none; transition: border-color .15s, box-shadow .15s, background .15s;
+  background: var(--input-bg); outline: none; transition: border-color .15s, box-shadow .15s, background .15s;
 }
 input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
-  border-color: var(--blue); background: #fff;
+  border-color: var(--blue); background: var(--card);
   box-shadow: 0 0 0 4px rgba(0, 112, 224, .14);
 }
 .btn {
@@ -309,3 +310,45 @@ footer strong { color: var(--ink-soft); }
 .brand h1, .card h2, .pending-card h3, .plea-card h3, .balance,
 .how-step strong, .tab, .cat-item-price, .tour-chip { font-family: var(--font-display); }
 .balance { letter-spacing: -.01em; }
+
+/* --- Dark mode ---------------------------------------------------------------- */
+[data-theme="dark"] {
+  --ink: #e9eef9;
+  --ink-soft: #a9b4cc;
+  --ink-faint: #79849e;
+  --bg: #0a101f;
+  --card: #131c30;
+  --line: #273350;
+  --input-bg: #0d1526;
+  --blue-deep: #7db8ff;
+  --good: #2fce8f;
+  --good-bg: #0c2a1e;
+  --warn: #f5b73f;
+  --warn-bg: #2e230a;
+  --bad: #ff7186;
+  --bad-bg: #33131d;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .45), 0 10px 30px -12px rgba(0, 0, 0, .6);
+  --shadow-lift: 0 2px 4px rgba(0, 0, 0, .5), 0 16px 38px -12px rgba(0, 0, 0, .7);
+}
+[data-theme="dark"] .topbar { background: rgba(9, 14, 27, .86); }
+[data-theme="dark"] .wallet { background: linear-gradient(135deg, #003087, #0070e0 58%, #009fe3); }
+[data-theme="dark"] .tab.active { background: var(--blue); }
+[data-theme="dark"] .chip { background: var(--card); }
+[data-theme="dark"] .chip:hover { background: #2a1a12; }
+[data-theme="dark"] .step.pitch { background: #2a1c12; border-color: #5a3a22; color: #f0c39a; }
+[data-theme="dark"] .pending-card { background: linear-gradient(180deg, #2b2410, #201a09); border-color: #8a6d1f; }
+[data-theme="dark"] .plea-card { background: linear-gradient(180deg, #2e161d, #211016); border-color: #7a3542; }
+[data-theme="dark"] .plea-text { color: #f3c3cd; }
+[data-theme="dark"] .diary-card { background: linear-gradient(180deg, #16203a, var(--card)); }
+[data-theme="dark"] .cat-sub { background: #3a1e10; color: #ff9d6b; }
+[data-theme="dark"] .vtag-ask { color: #f0b93f; }
+[data-theme="dark"] .tour-chip:hover { background: var(--card); }
+[data-theme="dark"] table.audit tbody tr:hover { background: #18253f; }
+[data-theme="dark"] .batik-band { opacity: .45; }
+
+.theme-toggle {
+  border: 1.5px solid var(--line); background: var(--card); color: var(--ink);
+  border-radius: 999px; padding: 8px 14px; font: inherit; font-size: 13.5px; font-weight: 700;
+  cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.theme-toggle:hover { border-color: var(--blue); }

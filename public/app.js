@@ -54,6 +54,19 @@ function activateTab(name) {
 }
 document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => activateTab(t.dataset.tab)));
 
+// --- Dark mode toggle (persisted; first visit follows the OS setting) ---------
+function syncThemeBtn() {
+  $('themeToggle').textContent = document.documentElement.dataset.theme === 'dark' ? '☀️ Light' : '🌙 Dark';
+}
+$('themeToggle').addEventListener('click', () => {
+  const dark = document.documentElement.dataset.theme !== 'dark';
+  if (dark) document.documentElement.dataset.theme = 'dark';
+  else document.documentElement.removeAttribute('data-theme');
+  try { localStorage.setItem('aijajan-theme', dark ? 'dark' : 'light'); } catch (e) {}
+  syncThemeBtn();
+});
+syncThemeBtn();
+
 const CATEGORY_META = {
   domains: ['🌐', 'Domains'], hosting: ['🖥️', 'Hosting'], games: ['🎮', 'Games'],
   subscriptions: ['🔁', 'Subscriptions'], music: ['🎵', 'Music'], design: ['🎨', 'Design'],
