@@ -67,10 +67,12 @@ async function geminiJson(prompt) {
   if (!key) return null;
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        // Current AI Studio keys (AQ.…) are rejected as ?key= query params
+        // (400 API_KEY_INVALID) but accepted via this header — verified live.
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: { temperature: 0.7, responseMimeType: 'application/json' },
@@ -144,6 +146,27 @@ function writeDiary(kind, ctx) {
   return text;
 }
 
+const DIARY_BRIEFS = {
+  paid: (c) => `You just bought "${c.item.name}" for $${c.price}. Your remaining uang jajan balance is $${c.balance}.`,
+  asked: (c) => `You found "${c.item.name}" for $${c.price} but it is above your auto-allow limit, so you must wait for the owner's approval before paying.`,
+  blocked: (c) => `The owner's rules BLOCKED you from buying "${c.item.name}". Reason: ${c.reason}`,
+  denied: (c) => `The owner said NO to "${c.item.name}" ($${c.price}). Your purchase was denied.`,
+  topup: (c) => `The owner just topped up your uang jajan with $${c.amount}. Your balance is now $${c.balance}.`,
+  pleaDenied: () => 'Your heartfelt plea for a top-up was rejected by the owner. You remain broke.',
+};
+
+/** Diary entry in Jaja's voice via Gemini when available; template otherwise. */
+async function writeDiaryAsync(kind, ctx) {
+  const brief = (DIARY_BRIEFS[kind] || DIARY_BRIEFS.paid)(ctx);
+  const llm = await geminiJson(
+    `You are Jaja, a cheerful, slightly dramatic AI agent who spends a weekly pocket-money allowance ("uang jajan"). ` +
+    `${brief} Write ONE diary entry about this, first person, 1-2 sentences, playful and a little dramatic, in English with an Indonesian flavor word or two. ` +
+    `Reply with ONLY JSON: {"text": "..."}`
+  );
+  if (llm && llm.text) return llm.text;
+  return writeDiary(kind, ctx);
+}
+
 async function composePlea(state) {
   const missing = Math.max(5, state.policy.weeklyAllowance - state.balance);
   const amount = Math.round(missing);
@@ -159,4 +182,4 @@ async function composePlea(state) {
   return { amount, text: (llm && llm.text) || fallbackText };
 }
 
-module.exports = { planMission, writeDiary, composePlea, scoreItem };
+module.exports = { planMission, writeDiary, writeDiaryAsync, composePlea, scoreItem };

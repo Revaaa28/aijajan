@@ -144,7 +144,7 @@ app.post('/api/mission', async (req, res) => {
 
     if (!chosen) {
       store.audit(state, 'blocked', `Mission "${text}" — every option was blocked. Last rule: ${verdict.rule}`);
-      state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: agent.writeDiary('blocked', { item: plan.pick, price: plan.pick.price.toFixed(2), reason: verdict.reason, rule: verdict.rule }) });
+      state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: await agent.writeDiaryAsync('blocked', { item: plan.pick, price: plan.pick.price.toFixed(2), reason: verdict.reason, rule: verdict.rule }) });
       store.save(state);
       return res.json({ steps, outcome: 'blocked', verdict, state: publicState(state) });
     }
@@ -153,7 +153,7 @@ app.post('/api/mission', async (req, res) => {
       const pending = { id: `pend-${Date.now()}`, item: chosen, verdict, mission: text, createdAt: new Date().toISOString() };
       state.pending.push(pending);
       store.audit(state, 'ask', `Asked owner before buying "${chosen.name}" ($${chosen.price.toFixed(2)})`, { rule: verdict.rule });
-      state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: agent.writeDiary('asked', { item: chosen, price: chosen.price.toFixed(2) }) });
+      state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: await agent.writeDiaryAsync('asked', { item: chosen, price: chosen.price.toFixed(2) }) });
       store.save(state);
       steps.push({ kind: 'pending', text: `Waiting on the boss. Approve it and I pay instantly.` });
       return res.json({ steps, outcome: 'ask', pendingId: pending.id, verdict, state: publicState(state) });
@@ -161,7 +161,7 @@ app.post('/api/mission', async (req, res) => {
 
     // ALLOW — pay right away.
     const result = await executePayment(state, chosen, verdict);
-    state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: agent.writeDiary('paid', { item: chosen, price: chosen.price.toFixed(2), balance: state.balance.toFixed(2), rule: verdict.rule }) });
+    state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: await agent.writeDiaryAsync('paid', { item: chosen, price: chosen.price.toFixed(2), balance: state.balance.toFixed(2), rule: verdict.rule }) });
     store.save(state);
     steps.push({ kind: 'paid', text: `Paid via PayPal (${paypal.mode}). Order ${result.orderId}. New balance $${state.balance.toFixed(2)}.` });
     return res.json({ steps, outcome: 'paid', verdict, order: result, state: publicState(state) });
@@ -184,7 +184,7 @@ app.post('/api/approve', async (req, res) => {
   }
   try {
     const result = await executePayment(state, pending.item, null);
-    state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: agent.writeDiary('paid', { item: pending.item, price: pending.item.price.toFixed(2), balance: state.balance.toFixed(2), rule: 'owner-approved' }) });
+    state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: await agent.writeDiaryAsync('paid', { item: pending.item, price: pending.item.price.toFixed(2), balance: state.balance.toFixed(2), rule: 'owner-approved' }) });
     store.save(state);
     return res.json({ outcome: 'paid', order: result, state: publicState(state) });
   } catch (err) {
@@ -193,13 +193,13 @@ app.post('/api/approve', async (req, res) => {
   }
 });
 
-app.post('/api/deny', (req, res) => {
+app.post('/api/deny', async (req, res) => {
   const state = store.load();
   const idx = state.pending.findIndex((p) => p.id === (req.body || {}).id);
   if (idx === -1) return res.status(404).json({ error: 'Pending approval not found.' });
   const [pending] = state.pending.splice(idx, 1);
   store.audit(state, 'denial', `Owner denied "${pending.item.name}" ($${pending.item.price.toFixed(2)})`);
-  state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: agent.writeDiary('denied', { item: pending.item, price: pending.item.price.toFixed(2) }) });
+  state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: await agent.writeDiaryAsync('denied', { item: pending.item, price: pending.item.price.toFixed(2) }) });
   store.save(state);
   res.json({ outcome: 'denied', state: publicState(state) });
 });
@@ -224,17 +224,17 @@ app.post('/api/plea/approve', async (req, res) => {
   const result = await paypal.topUp(amount);
   state.balance = store.round2(state.balance + amount);
   store.audit(state, 'topup', `Owner approved the plea — topped up $${amount.toFixed(2)} (${result.payoutId})`, { amount });
-  state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: agent.writeDiary('topup', { amount: amount.toFixed(2), balance: state.balance.toFixed(2) }) });
+  state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: await agent.writeDiaryAsync('topup', { amount: amount.toFixed(2), balance: state.balance.toFixed(2) }) });
   store.save(state);
   res.json({ outcome: 'topped-up', payout: result, state: publicState(state) });
 });
 
-app.post('/api/plea/deny', (req, res) => {
+app.post('/api/plea/deny', async (req, res) => {
   const state = store.load();
   if (!state.plea) return res.status(404).json({ error: 'No plea to deny.' });
   state.plea = null;
   store.audit(state, 'plea-denied', 'Owner denied Jaja\'s top-up plea.');
-  state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: agent.writeDiary('pleaDenied', {}) });
+  state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: await agent.writeDiaryAsync('pleaDenied', {}) });
   store.save(state);
   res.json({ outcome: 'plea-denied', state: publicState(state) });
 });
@@ -247,7 +247,7 @@ app.post('/api/topup', async (req, res) => {
   state.balance = store.round2(state.balance + amount);
   if (state.plea && state.balance >= 5) state.plea = null;
   store.audit(state, 'topup', `Owner topped up $${amount.toFixed(2)} (${result.payoutId})`, { amount });
-  state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: agent.writeDiary('topup', { amount: amount.toFixed(2), balance: state.balance.toFixed(2) }) });
+  state.diary.push({ ts: new Date().toISOString(), mood: store.moodFor(state.balance).key, text: await agent.writeDiaryAsync('topup', { amount: amount.toFixed(2), balance: state.balance.toFixed(2) }) });
   store.save(state);
   res.json({ outcome: 'topped-up', payout: result, state: publicState(state) });
 });
