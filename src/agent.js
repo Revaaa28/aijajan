@@ -27,6 +27,10 @@ const CATEGORY_HINTS = {
   subscriptions: ['subscription', 'subscribe', 'streamflix', 'streaming', 'movies', 'premium'],
   music: ['music', 'song', 'album', 'spotify', 'lo-fi', 'beat', 'loops', 'musik', 'lagu'],
   food: ['food', 'lunch', 'dinner', 'breakfast', 'brunch', 'snack', 'snacks', 'drink', 'drinks', 'coffee', 'boba', 'bubble tea', 'groceries', 'grocery', 'makan', 'makanan', 'minum', 'minuman', 'belanja', 'jajan', 'nasi', 'kopi', 'martabak', 'bakso', 'sate', 'rendang', 'lapar'],
+  transport: ['transport', 'ride', 'rides', 'ojek', 'taxi', 'fuel', 'bensin', 'trip', 'trips', 'toll', 'e-toll', 'motorbike', 'perjalanan', 'angkot', 'bus'],
+  bills: ['pulsa', 'kuota', 'paket data', 'data package', 'listrik', 'token listrik', 'pln', 'tagihan', 'bill', 'bills', 'electricity', 'internet bill'],
+  health: ['health', 'healthy', 'sehat', 'kesehatan', 'obat', 'medicine', 'vitamin', 'pharmacy', 'apotek', 'gym', 'workout', 'jamu', 'sakit', 'flu'],
+  home: ['laundry', 'cleaning', 'housekeeping', 'cuci', 'setrika', 'galon', 'maid service'],
   design: ['design', 'logo', 'font', 'icon', 'icons', 'photo', 'photos', 'template', 'branding'],
 };
 
