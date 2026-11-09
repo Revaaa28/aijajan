@@ -43,6 +43,57 @@ function render(state) {
   renderPlea(state);
   renderDiary(state);
   renderAudit(state);
+  renderCatalog(state);
+}
+
+const CATEGORY_META = {
+  domains: ['🌐', 'Domains'], hosting: ['🖥️', 'Hosting'], games: ['🎮', 'Games'],
+  subscriptions: ['🔁', 'Subscriptions'], music: ['🎵', 'Music'], design: ['🎨', 'Design'],
+  food: ['🍜', 'Food & drink'], transport: ['🚗', 'Transport'], bills: ['💡', 'Bills & data'],
+  health: ['💊', 'Health'], home: ['🧺', 'Home'], tickets: ['🎟️', 'Tickets'],
+};
+let catalogFilter = 'all';
+let catalogBuilt = false;
+
+function renderCatalog(state) {
+  if (!state.catalog) return;
+  const chips = $('catalogChips');
+  const grid = $('catalogGrid');
+  if (!catalogBuilt) {
+    const cats = [...new Set(state.catalog.map((i) => i.category))];
+    chips.innerHTML = '';
+    const mkChip = (key, label) => {
+      const b = document.createElement('button');
+      b.className = 'catalog-chip' + (catalogFilter === key ? ' active' : '');
+      b.textContent = label;
+      b.addEventListener('click', () => { catalogFilter = key; catalogBuilt = false; renderCatalog(current); });
+      chips.appendChild(b);
+    };
+    mkChip('all', `🛍️ All (${state.catalog.length})`);
+    for (const c of cats) {
+      const [emoji, label] = CATEGORY_META[c] || ['🏷️', c];
+      mkChip(c, `${emoji} ${label} (${state.catalog.filter((i) => i.category === c).length})`);
+    }
+    catalogBuilt = true;
+  }
+  const items = catalogFilter === 'all' ? state.catalog : state.catalog.filter((i) => i.category === catalogFilter);
+  grid.innerHTML = '';
+  for (const item of items) {
+    const card = document.createElement('button');
+    card.className = 'cat-item';
+    card.innerHTML = `<span class="cat-item-name"></span>
+      <span class="cat-item-meta"><span class="cat-item-vendor"></span>${item.subscription ? '<span class="cat-sub">subscription</span>' : ''}</span>
+      <span class="cat-item-price">${money(item.price)}</span>`;
+    card.querySelector('.cat-item-name').textContent = item.name;
+    card.querySelector('.cat-item-vendor').textContent = item.vendor;
+    card.title = item.blurb;
+    card.addEventListener('click', () => {
+      $('missionInput').value = 'Buy me: ' + item.name;
+      $('missionInput').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      $('missionInput').focus();
+    });
+    grid.appendChild(card);
+  }
 }
 
 function renderPending(state) {
