@@ -31,6 +31,7 @@ const CATEGORY_HINTS = {
   bills: ['pulsa', 'kuota', 'paket data', 'data package', 'listrik', 'token listrik', 'pln', 'tagihan', 'bill', 'bills', 'electricity', 'internet bill'],
   health: ['health', 'healthy', 'sehat', 'kesehatan', 'obat', 'medicine', 'vitamin', 'pharmacy', 'apotek', 'gym', 'workout', 'jamu', 'sakit', 'flu'],
   home: ['laundry', 'cleaning', 'housekeeping', 'cuci', 'setrika', 'galon', 'maid service'],
+  tickets: ['ticket', 'tickets', 'concert', 'stadium', 'train', 'bus ticket', 'intercity bus', 'match', 'festival', 'tiket', 'konser', 'stadion', 'kereta', 'pertandingan', 'cinema', 'movie'],
   design: ['design', 'logo', 'font', 'icon', 'icons', 'photo', 'photos', 'template', 'branding'],
 };
 
@@ -48,6 +49,7 @@ const ID_WORDS = {
   kuota: 'data', galon: 'water refill', cuci: 'laundry', setrika: 'iron', obat: 'medicine',
   makan: 'food', minum: 'drink', belanja: 'groceries', bensin: 'fuel', ojek: 'ride',
   perjalanan: 'trip', tagihan: 'bill', jamu: 'herbal tonic', air: 'water', baju: 'clothes',
+  tiket: 'ticket', konser: 'concert', stadion: 'stadium', kereta: 'train', bis: 'bus',
 };
 
 function withIdGloss(text) {

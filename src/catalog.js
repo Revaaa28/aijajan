@@ -68,6 +68,13 @@ const ITEMS = [
   { id: 'hom-02', name: 'Home cleaning voucher — 2 hours', category: 'home', price: 13.50, vendor: 'BersihKu', subscription: false, blurb: 'Two hours of someone else making it spotless.' },
   { id: 'hom-03', name: 'Drinking water refill voucher x4', category: 'home', price: 3.20, vendor: 'SegarKu', subscription: false, blurb: 'Four big-jug drinking water refills. Hydration is a lifestyle.' },
 
+  // --- Tickets ---------------------------------------------------------------------
+  { id: 'tic-01', name: 'Concert ticket — city music festival', category: 'tickets', price: 24.00, vendor: 'TiketKu', subscription: false, blurb: 'One night, three stages, zero regrets.' },
+  { id: 'tic-02', name: 'Stadium ticket — home match', category: 'tickets', price: 16.50, vendor: 'TiketKu', subscription: false, blurb: 'Your team, your stand, your voice gone by Monday.' },
+  { id: 'tic-03', name: 'Intercity train ticket', category: 'tickets', price: 13.75, vendor: 'JalanKu', subscription: false, blurb: 'Window seat, six hours, one very long playlist.' },
+  { id: 'tic-04', name: 'Intercity bus ticket', category: 'tickets', price: 9.80, vendor: 'JalanKu', subscription: false, blurb: 'Overnight sleeper. Wake up in another city.' },
+  { id: 'tic-05', name: 'Cinema ticket — premiere night', category: 'tickets', price: 8.25, vendor: 'TiketKu', subscription: false, blurb: 'Big screen, opening weekend, best seats in the house.' },
+
   // --- Design assets ------------------------------------------------------------
   { id: 'des-01', name: 'Icon pack — 2,000 hand-drawn icons', category: 'design', price: 18.00, vendor: 'PixelPasar', subscription: false, blurb: 'Every icon you will ever need, including three kinds of rocket.' },
   { id: 'des-02', name: 'Font bundle — "Kala Senja" serif family', category: 'design', price: 22.00, vendor: 'PixelPasar', subscription: false, blurb: 'A gorgeous serif with Indonesian diacritics done right.' },

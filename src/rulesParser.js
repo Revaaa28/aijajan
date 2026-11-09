@@ -13,7 +13,7 @@
  * `understood` is a list of human-readable lines echoing what was heard.
  */
 
-const CATEGORIES = ['domains', 'hosting', 'games', 'subscriptions', 'music', 'design', 'food', 'transport', 'bills', 'health', 'home'];
+const CATEGORIES = ['domains', 'hosting', 'games', 'subscriptions', 'music', 'design', 'food', 'transport', 'bills', 'health', 'home', 'tickets'];
 
 function moneyAfter(text, regex) {
   const m = text.match(regex);

@@ -40,6 +40,13 @@ test('fallback planner understands Indonesian at item level', () => {
   assert.equal(mockPlan('nasi goreng satu porsi').pick.id, 'fod-01');
 });
 
+test('ticket missions pick tickets in both languages', () => {
+  assert.equal(mockPlan('buy me a concert ticket').pick.id, 'tic-01');
+  assert.equal(mockPlan('beli tiket kereta ke kota sebelah').pick.id, 'tic-03');
+  assert.equal(mockPlan('tiket ke stadion buat nonton pertandingan').pick.id, 'tic-02');
+  assert.equal(mockPlan('get me an intercity bus ticket').pick.id, 'tic-04');
+});
+
 test('domain mission still picks a domain', () => {
   const plan = mockPlan('Buy me a cheap domain for my bakery');
   assert.equal(plan.pick.category, 'domains');
